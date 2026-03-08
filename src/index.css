@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg-primary: #1B1B2F;
+  --color-bg-card: #162447;
+  --color-bg-row-1: #1F4068;
+  --color-bg-row-2: #1B1B2F;
+  --color-bg-input: #0D2137;
+  --color-bg-highlight: #1B5E20;
+  --color-text-primary: #E0E0E0;
+  --color-text-income: #66BB6A;
+  --color-text-expense: #EF5350;
+  --color-text-net: #FFD740;
+  --color-text-balance: #4DD0E1;
+  --color-text-extra: #FFA726;
+  --color-text-label: #90CAF9;
+  --color-accent: #64B5F6;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: #1B1B2F;
+  color: #E0E0E0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+#root {
+  height: 100%;
+  min-height: 100dvh;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track { background: #1B1B2F; }
+::-webkit-scrollbar-thumb { background: #1F4068; border-radius: 2px; }
+
+/* Safe area support for iOS */
+.safe-top { padding-top: env(safe-area-inset-top); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+.safe-left { padding-left: env(safe-area-inset-left); }
+.safe-right { padding-right: env(safe-area-inset-right); }
+
+/* Touch action for swipeable areas */
+.swipeable { touch-action: pan-y; }
+
+/* Prevent text selection on interactive elements */
+.no-select { user-select: none; -webkit-user-select: none; }
+
+/* Smooth scrolling */
+.smooth-scroll { scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+
+/* Input reset */
+input, textarea, select {
+  background: transparent;
+  outline: none;
+  font-family: inherit;
+}
+
+/* Remove number input arrows */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+input[type=number] { -moz-appearance: textfield; }
+
+/* Animated transitions */
+.fade-in {
+  animation: fadeIn 0.2s ease-in;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
