@@ -85,14 +85,14 @@ export const useBudgetStore = create<BudgetStore>((set, get) => ({
         if (cached) profile = cached
       }
 
-      if (billsRes.data) {
+      if (!billsRes.error && billsRes.data !== null) {
         bills = billsRes.data.map(mapDbBill)
         await cacheBills(bills)
       } else {
         bills = await getCachedBills(userId)
       }
 
-      if (extrasRes.data) {
+      if (!extrasRes.error && extrasRes.data !== null) {
         extraItems = extrasRes.data.map(mapDbExtra)
         await cacheExtraItems(extraItems)
       } else {
@@ -165,7 +165,7 @@ export const useBudgetStore = create<BudgetStore>((set, get) => ({
       ...billData,
     }
 
-    await upsertBill({
+    const insertResult = await upsertBill({
       id: bill.id,
       user_id: bill.userId,
       name: bill.name,
@@ -176,6 +176,7 @@ export const useBudgetStore = create<BudgetStore>((set, get) => ({
       status: bill.status,
       sort_order: bill.sortOrder,
     })
+    if (insertResult.error) throw new Error(insertResult.error.message)
 
     const updatedBills = [...bills, bill]
     await cacheBills(updatedBills)
@@ -184,7 +185,7 @@ export const useBudgetStore = create<BudgetStore>((set, get) => ({
   },
 
   updateBill: async (bill: Bill) => {
-    await upsertBill({
+    const updateResult = await upsertBill({
       id: bill.id,
       user_id: bill.userId,
       name: bill.name,
@@ -195,6 +196,7 @@ export const useBudgetStore = create<BudgetStore>((set, get) => ({
       status: bill.status,
       sort_order: bill.sortOrder,
     })
+    if (updateResult.error) throw new Error(updateResult.error.message)
 
     const updatedBills = get().bills.map(b => b.id === bill.id ? bill : b)
     await cacheBills(updatedBills)

@@ -43,6 +43,7 @@ export function OnboardingFlow() {
   const [income, setIncome] = useState<IncomeForm | null>(null)
   const [bills, setBills] = useState<DraftBill[]>([])
   const [addingBill, setAddingBill] = useState(false)
+  const [quickAddPrefill, setQuickAddPrefill] = useState<Partial<DraftBill> | undefined>()
 
   const { user } = useAuthStore()
   const { saveProfile, addBill, setOnboardingComplete } = useBudgetStore()
@@ -126,7 +127,9 @@ export function OnboardingFlow() {
             onRemoveBill={i => setBills(prev => prev.filter((_, idx) => idx !== i))}
             onNext={() => setStep(4)}
             addingBill={addingBill}
-            setAddingBill={setAddingBill}
+            setAddingBill={v => { setAddingBill(v); if (!v) setQuickAddPrefill(undefined) }}
+            quickAddPrefill={quickAddPrefill}
+            onQuickAddSelect={prefill => { setQuickAddPrefill(prefill); setAddingBill(true) }}
           />
         )}
         {step === 4 && (
@@ -221,7 +224,7 @@ function StepIncome({
 // ─── Step 3: Bills ────────────────────────────────────────────────────────────
 
 function StepBills({
-  bills, onAddBill, onRemoveBill, onNext, addingBill, setAddingBill,
+  bills, onAddBill, onRemoveBill, onNext, addingBill, setAddingBill, quickAddPrefill, onQuickAddSelect,
 }: {
   bills: DraftBill[]
   onAddBill: (b: DraftBill) => void
@@ -229,6 +232,8 @@ function StepBills({
   onNext: () => void
   addingBill: boolean
   setAddingBill: (v: boolean) => void
+  quickAddPrefill: Partial<DraftBill> | undefined
+  onQuickAddSelect: (prefill: Partial<DraftBill>) => void
 }) {
   return (
     <div className="fade-in">
@@ -245,7 +250,7 @@ function StepBills({
               return (
                 <button
                   key={qb.name}
-                  onClick={() => !already && onAddBill({ name: qb.name, amount: 0, frequency: qb.frequency, dueDay: qb.dueDay, category: qb.category })}
+                  onClick={() => !already && onQuickAddSelect({ name: qb.name, frequency: qb.frequency, dueDay: qb.dueDay, category: qb.category })}
                   className={`flex-shrink-0 px-3 py-2 rounded-xl text-sm font-medium border transition-all ${
                     already
                       ? 'border-[#66BB6A] bg-[#66BB6A]/10 text-[#66BB6A]'
@@ -282,7 +287,7 @@ function StepBills({
 
       {/* Add bill form */}
       {addingBill
-        ? <AddBillForm onAdd={b => { onAddBill(b); setAddingBill(false) }} onCancel={() => setAddingBill(false)} />
+        ? <AddBillForm prefill={quickAddPrefill} onAdd={b => { onAddBill(b); setAddingBill(false) }} onCancel={() => setAddingBill(false)} />
         : (
           <button
             onClick={() => setAddingBill(true)}
@@ -302,12 +307,12 @@ function StepBills({
   )
 }
 
-function AddBillForm({ onAdd, onCancel }: { onAdd: (b: DraftBill) => void; onCancel: () => void }) {
-  const [name, setName] = useState('')
-  const [amount, setAmount] = useState('')
-  const [frequency, setFrequency] = useState<BillFrequency>('monthly')
-  const [dueDay, setDueDay] = useState('1')
-  const [category, setCategory] = useState<BillCategory>('other')
+function AddBillForm({ onAdd, onCancel, prefill }: { onAdd: (b: DraftBill) => void; onCancel: () => void; prefill?: Partial<DraftBill> }) {
+  const [name, setName] = useState(prefill?.name ?? '')
+  const [amount, setAmount] = useState(prefill?.amount ? String(prefill.amount) : '')
+  const [frequency, setFrequency] = useState<BillFrequency>(prefill?.frequency ?? 'monthly')
+  const [dueDay, setDueDay] = useState(String(prefill?.dueDay ?? '1'))
+  const [category, setCategory] = useState<BillCategory>(prefill?.category ?? 'other')
 
   const handleAdd = () => {
     if (!name.trim()) return
